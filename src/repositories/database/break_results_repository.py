@@ -2,6 +2,7 @@ from typing import List
 from src.core.database import Database
 from src.models.break_result import BreakResult
 
+
 class BreakResultsRepository:
     def __init__(self, database: Database):
         self.database = database
