@@ -1,10 +1,10 @@
 from dataclasses import dataclass
 from typing import List, Dict
+from repositories.database.break_results_repository import BreakResultsRepository
+from repositories.database.items_repository import ItemsRepository
+from repositories.database.runes_repository import RunesRepository
 from src.core.database import Database
-from src.models.break_result import BreakResult
-from src.repositories.items_repository import ItemsRepository
-from src.repositories.runes_repository import RunesRepository
-from src.repositories.break_results_repository import BreakResultsRepository
+
 
 class BreakCalculatorService:
     def __init__(self, database: Database):
@@ -16,11 +16,11 @@ class BreakCalculatorService:
     def calculate_and_display_break_results(self):
         """Calcule et affiche la rentabilité des brisages"""
         print("Calcul de la rentabilité en cours...")
-        
+
         items = self.items_repo.get_all_items()
         total = len(items)
         results = []
-        
+
         for idx, item in enumerate(items, 1):
             item_details = self.items_repo.get_item_by_id(item.id)
             if not item_details or not item_details.characteristics:
@@ -29,7 +29,8 @@ class BreakCalculatorService:
             item_results = self._calculate_item_break_value(item_details)
             if item_results:
                 results.extend(item_results)
-                print(f"Item {idx}/{total}: {item.name_fr} - {len(item_results)} résultats calculés")
+                print(
+                    f"Item {idx}/{total}: {item.name_fr} - {len(item_results)} résultats calculés")
 
         if results:
             self.results_repo.save_results(results)
@@ -50,7 +51,8 @@ class BreakCalculatorService:
                 continue
 
             avg_value = (char.min_value + char.max_value) / 2
-            runes_generated = (avg_value * item.coefficient) / (rune.weight * 100)
+            runes_generated = (avg_value * item.coefficient) / \
+                (rune.weight * 100)
             total_value = runes_generated * rune.price
 
             results.append(BreakResult(

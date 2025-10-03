@@ -2,6 +2,7 @@ from typing import List, Optional
 from src.core.database import Database
 from src.models.rune import Rune
 
+
 class RunesRepository:
     def __init__(self, database: Database):
         self.database = database

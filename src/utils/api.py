@@ -5,6 +5,7 @@ from ..core.config import REQUEST_DELAY_SECONDS, DOFOCUS_API_BASE_URL
 
 _session: Optional[requests.Session] = None
 
+
 def _get_session() -> requests.Session:
     global _session
     if _session is None:
@@ -14,6 +15,7 @@ def _get_session() -> requests.Session:
         s.mount("http://", adapter)
         _session = s
     return _session
+
 
 def make_request(method: str, endpoint: str, **kwargs) -> Any:
     """Effectue une requête HTTP vers l'API avec gestion des délais et retries."""

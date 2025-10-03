@@ -1,21 +1,24 @@
 import requests
+
+from repositories.database.items_repository import ItemsRepository
 from ..utils.api import make_request
 from ..utils.console import print_progress
 from ..models.item import Item
-from src.repositories.items_repository import ItemsRepository
 from ..core.config import DOFOCUS_ITEM_DETAIL_URL, SERVER_NAME
 import time
+
 
 class ItemsService:
     def __init__(self, database):
         self.database = database
         self.items_repo = ItemsRepository(database)
-        
+
     def fetch_and_save_all_items(self):
         """Récupère et sauvegarde tous les items depuis l'API"""
         print("Récupération des items en cours...")
         try:
-            items_data = make_request("GET", "/items?fields=id+name+type+level&lang=fr")
+            items_data = make_request(
+                "GET", "/items?fields=id+name+type+level&lang=fr")
             total = len(items_data or [])
             print(f"Nombre d'items trouvés : {total}")
 
@@ -28,7 +31,7 @@ class ItemsService:
             print("\nSauvegarde terminée avec succès.")
         except Exception as e:
             print(f"\nErreur lors de la récupération des items: {e}")
-    
+
     def _save_item(self, item: Item):
         """Persistance élémentaire (dofus_items + details si présents)"""
         self.items_repo.save_item(item)
@@ -43,7 +46,7 @@ class ItemsService:
             if not item:
                 print(f"Item {item_id} non trouvé.")
                 return
-                
+
             print("\n=== Détails de l'item ===")
             print(f"Nom: {item.name_fr}")
             print(f"Type: {item.type_fr}")
@@ -52,7 +55,7 @@ class ItemsService:
             print("\nCaractéristiques:")
             for char in item.characteristics:
                 print(f"- {char.name}: {char.min_value} à {char.max_value}")
-                
+
         except Exception as e:
             print(f"Erreur lors de la récupération des détails: {e}")
 
@@ -69,7 +72,8 @@ class ItemsService:
                 import requests
                 response = requests.get(url)
                 if not response.ok:
-                    print(f"Erreur HTTP pour item {item.id}: {response.status_code}")
+                    print(
+                        f"Erreur HTTP pour item {item.id}: {response.status_code}")
                     continue
                 data = response.json()
                 # Récupérer le coefficient et le prix pour Salar

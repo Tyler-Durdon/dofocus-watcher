@@ -1,14 +1,15 @@
+from repositories.database.runes_repository import RunesRepository
 from ..utils.api import make_request
 from ..utils.console import print_progress
 from ..models.rune import Rune
-from src.repositories.runes_repository import RunesRepository
 from ..core.config import SERVER_NAME
+
 
 class RunesService:
     def __init__(self, database):
         self.database = database
         self.runes_repo = RunesRepository(database)
-        
+
     def fetch_and_save_all_runes(self):
         """Récupère et sauvegarde toutes les runes depuis l'API"""
         print("Récupération des runes en cours...")
@@ -21,7 +22,8 @@ class RunesService:
             for idx, rune_data in enumerate(runes_data or [], 1):
                 # Filtrer sur le serveur Salar
                 price_info = next(
-                    (p for p in rune_data.get("latestPrices", []) if p.get("serverName") == SERVER_NAME),
+                    (p for p in rune_data.get("latestPrices", [])
+                     if p.get("serverName") == SERVER_NAME),
                     None
                 )
                 if not price_info:

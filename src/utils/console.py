@@ -2,34 +2,37 @@ import os
 import sys
 from typing import List
 
+
 class ConsoleMenu:
     def print_header(self, title: str):
         """Affiche l'en-tête du menu"""
         print("\n" + "="*50)
         print(f"{title:^50}")
         print("="*50 + "\n")
-        
+
     def print_options(self, options: list):
         """Affiche les options du menu"""
         for option in options:
             print(option)
         print()
-            
+
     def get_choice(self, prompt: str = "Votre choix: ") -> str:
         """Récupère le choix de l'utilisateur"""
         return input(prompt)
-    
+
     def get_input(self, prompt: str) -> str:
         """Récupère une entrée utilisateur"""
         return input(prompt)
-    
+
     def wait_for_user(self):
         """Attend que l'utilisateur appuie sur une touche"""
         input("\nAppuyez sur Entrée pour continuer...")
 
+
 def clear_screen():
     """Efface l'écran de la console"""
     os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def print_progress(current: int, total: int):
     """Affiche une barre de progression (tolère total == 0)"""
