@@ -4,22 +4,34 @@ SET
 
 USE dofocus_watcher;
 
-CREATE TABLE
-    IF NOT EXISTS items (
-        id INT PRIMARY KEY,
-        name VARCHAR(255),
-        type VARCHAR(255),
-        level INT,
-        coefficient INT,
-        price INT
-    );
+DROP TABLE IF EXISTS item_characteristics;
+DROP TABLE IF EXISTS item_details;
+DROP TABLE IF EXISTS dofus_items;
 
-CREATE TABLE
-    IF NOT EXISTS characteristics (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        item_id INT,
-        name VARCHAR(255),
-        min_value INT,
-        max_value INT,
-        FOREIGN KEY (item_id) REFERENCES items (id)
-    );
+-- Table for basic items (French only)
+CREATE TABLE dofus_items (
+    id INTEGER PRIMARY KEY,
+    name_fr TEXT,
+    type_fr TEXT,
+    level INTEGER
+);
+
+-- Table for item details (French, Salar only)
+CREATE TABLE item_details (
+    id INTEGER PRIMARY KEY,
+    name_fr TEXT,
+    type_fr TEXT,
+    level INTEGER,
+    coefficient INTEGER,
+    price INTEGER
+);
+
+-- Table for item characteristics (linked to item_details)
+CREATE TABLE item_characteristics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER,
+    name TEXT,
+    min_value INTEGER,
+    max_value INTEGER,
+    FOREIGN KEY (item_id) REFERENCES item_details(id)
+);
