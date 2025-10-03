@@ -40,6 +40,8 @@ def main():
                     price = price_info.get("price")
                     date_updated = price_info.get("dateUpdated")
                     break
+            if price is None:
+                continue  # ignorer les runes sans prix sur Salar
             runes.append(Rune(
                 id=rune.get("id"),
                 name_fr=name_fr,

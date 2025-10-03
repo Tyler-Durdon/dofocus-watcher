@@ -221,3 +221,6 @@ pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pythonvanilla,visualstudiocode
 dofocus_watcher.db
+
+# Project specific
+data/*.db

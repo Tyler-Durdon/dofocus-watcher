@@ -1,70 +1,72 @@
-import requests
-import time
-from config import (
-    DATABASE_PATH,
-    DOFOCUS_ITEMS_API_URL,
-    DOFOCUS_ITEM_DETAIL_API_URL,
-    SERVER_NAME,
-    REQUEST_DELAY_SECONDS
-)
-from dofus_items_repository import DofusItemsRepository
-from item_details_repository import ItemDetailsRepository
-from models.dofus_item import DofusItem
-from models.item_details import ItemDetails
+from src.core.config import DATABASE_PATH
+from src.core.database import Database
+from src.services.items_service import ItemsService
+from src.services.runes_service import RunesService
+from src.services.break_calculator_service import BreakCalculatorService
+from src.utils.console import ConsoleMenu, clear_screen
 
 
-def print_progress(current, total):
-    bar_length = 40
-    filled_length = int(bar_length * current // total)
-    bar = '=' * filled_length + '-' * (bar_length - filled_length)
-    print(f"\rProgress: |{bar}| {current}/{total}", end='')
+def setup_services():
+    """Initialise les services nécessaires"""
+    database = Database(DATABASE_PATH)
+    database.setup_database()
+
+    return {
+        'items': ItemsService(database),
+        'runes': RunesService(database),
+        'calculator': BreakCalculatorService(database)
+    }
 
 
-def fetch_all_items():
-    print("Fetching all items (French only)...")
-    repo = DofusItemsRepository(DATABASE_PATH)
-    repo.setup_table()
-    try:
-        response = requests.get(DOFOCUS_ITEMS_API_URL)
-        print(f"\nHTTP Response [{response.status_code}]")
-        if not response.ok:
-            print(f"HTTP Error: {response.status_code} - {response.reason}")
-            return
-        data = response.json()
-        if not isinstance(data, list):
-            print(f"Error: Unexpected response format: {data}")
-            return
-        print(f"Nombre d'objets reçus : {len(data)}")
-        items = []
-        for idx, item in enumerate(data, 1):
-            name_fr = item.get("name", {}).get("fr", "")
-            type_fr = item.get("supertype", {}).get("name", {}).get(
-                "fr", "") if item.get("supertype") else ""
-            items.append(DofusItem(
-                id=item.get("id"),
-                name_fr=name_fr,
-                type_fr=type_fr,
-                level=item.get("level")
-            ))
-            if idx % 100 == 0 or idx == len(data):
-                print_progress(idx, len(data))
-            time.sleep(REQUEST_DELAY_SECONDS / 10)
-        repo.save_items_batch(items)
-        print("\nSauvegarde terminée.")
-    except Exception as e:
-        print(f"\nErreur lors de la requête: {e}")
+def main():
+    services = setup_services()
+    menu = ConsoleMenu()
+
+    while True:
+        clear_screen()
+        menu.print_header("DofocusWatcher - Menu Principal")
+        menu.print_options([
+            "1. Récupérer tous les items (liste simple)",
+            "2. Récupérer toutes les runes",
+            "3. Récupérer et sauvegarder les détails de tous les items",
+            "4. Consulter le détail d'un item",
+            "5. Calculer la rentabilité des brisages",
+            "6. Top 10 des objets les plus rentables",
+            "0. Quitter"
+        ])
+
+        choice = menu.get_choice("Votre choix: ")
+
+        try:
+            if choice == "1":
+                services['items'].fetch_and_save_all_items()
+            elif choice == "2":
+                services['runes'].fetch_and_save_all_runes()
+            elif choice == "3":
+                services['items'].fetch_and_save_all_item_details()
+            elif choice == "4":
+                item_id = menu.get_input("Entrez l'ID de l'item: ")
+                if item_id.isdigit():
+                    services['items'].display_item_details(int(item_id))
+                else:
+                    print("ID invalide.")
+            elif choice == "5":
+                services['calculator'].calculate_and_display_break_results()
+            elif choice == "6":
+                services['calculator'].display_top_10_profitable_items()
+            elif choice == "0":
+                print("Au revoir!")
+                break
+            else:
+                print("Choix invalide")
+        except Exception as e:
+            print(f"Erreur: {e}")
+
+        menu.wait_for_user()
 
 
-def fetch_and_save_item_details(item_id):
-    print(f"Fetching details for item ID {item_id} (French/Salar only)...")
-    repo = ItemDetailsRepository(DATABASE_PATH)
-    repo.setup_tables()
-    try:
-        url = DOFOCUS_ITEM_DETAIL_API_URL.format(id=item_id)
-        response = requests.get(url)
-        print(f"\nHTTP Response [{response.status_code}]")
-        if not response.ok:
-            print(f"HTTP Error: {response.status_code} - {response.reason}")
+if __name__ == "__main__":
+    main()
             return
         data = response.json()
         name_fr = data["name"]["fr"]
@@ -98,7 +100,7 @@ def fetch_and_save_item_details(item_id):
             price=price,
             characteristics=characteristics
         )
-        repo.save_item_details(details)
+        repr.save_item_details(details)
         print("Sauvegarde terminée.")
     except Exception as e:
         print(f"\nErreur lors de la requête: {e}")
