@@ -77,6 +77,7 @@ def fetch_and_save_item_details(item_id):
                 "Max": c["to"]
             }
             for c in data.get("characteristics", [])
+            if c["name"]["fr"].lower() != "unknown characteristic"
         ]
         coefficient = next(
             (c["coefficient"] for c in data.get("coefficients", [])

@@ -6,10 +6,14 @@ class ItemDetails:
         self.level = level
         self.coefficient = coefficient
         self.price = price
-        self.characteristics = characteristics  # List of dicts: {"Caractéristique": ..., "Min": ..., "Max": ...}
+        # List of dicts: {"Caractéristique": ..., "Min": ..., "Max": ...}
+        self.characteristics = characteristics
 
     def as_tuple(self):
         return (self.id, self.name_fr, self.type_fr, self.level, self.coefficient, self.price)
 
     def characteristics_tuples(self):
-        return [(self.id, c["Caractéristique"], c["Min"], c["Max"]) for c in self.characteristics]
+        return [
+            (self.id, c["Caractéristique"], c["Min"], c["Max"])
+            for c in self.characteristics
+        ]
