@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import List, Dict
-from repositories.database.break_results_repository import BreakResultsRepository
-from repositories.database.items_repository import ItemsRepository
-from repositories.database.runes_repository import RunesRepository
+from src.repositories.database.break_results_repository import BreakResultsRepository
+from src.repositories.database.items_repository import ItemsRepository
+from src.repositories.database.runes_repository import RunesRepository
 from src.core.database import Database
+from src.models.break_result import BreakResult
 
 
 class BreakCalculatorService:

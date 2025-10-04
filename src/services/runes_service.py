@@ -1,8 +1,8 @@
-from repositories.database.runes_repository import RunesRepository
-from ..utils.api import make_request
-from ..utils.console import print_progress
-from ..models.rune import Rune
-from ..core.config import SERVER_NAME
+from src.repositories.database.runes_repository import RunesRepository
+from src.utils.api import make_request
+from src.utils.console import print_progress
+from src.models.rune import Rune
+from src.core.config import SERVER_NAME
 
 
 class RunesService:

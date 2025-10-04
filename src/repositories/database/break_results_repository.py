@@ -1,5 +1,6 @@
 from typing import List
 from src.core.database import Database
+from src.models.break_result import BreakResult
 
 
 class BreakResultsRepository:
