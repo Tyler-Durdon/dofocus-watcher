@@ -1,10 +1,10 @@
 import requests
 
-from repositories.database.items_repository import ItemsRepository
+from src.repositories.database.items_repository import ItemsRepository
 from ..utils.api import make_request
 from ..utils.console import print_progress
-from ..models.item import Item
 from ..core.config import DOFOCUS_ITEM_DETAIL_URL, SERVER_NAME
+from ..models.item import Item, Characteristic
 import time
 
 
@@ -108,3 +108,59 @@ class ItemsService:
                 print(f"Erreur sur item {item.id}: {e}")
 
         print("\nSauvegarde des détails terminée avec succès.")
+
+    def fetch_and_save_item_detail(self, item_id: int):
+        """Récupère et sauvegarde le détail d'un item par id, avec date du prix et du coeff"""
+        try:
+            url = DOFOCUS_ITEM_DETAIL_URL(item_id)
+            response = requests.get(url)
+            if not response.ok:
+                print(
+                    f"Erreur HTTP pour item {item_id}: {response.status_code}")
+                return
+            data = response.json()
+            # Récupérer coefficient et sa date pour Salar
+            coeff_info = next(
+                (c for c in data.get("coefficients", [])
+                 if c.get("serverName") == SERVER_NAME),
+                None
+            )
+            coefficient = coeff_info.get("coefficient") if coeff_info else None
+            coeff_date = coeff_info.get("lastUpdate") if coeff_info else None
+
+            # Récupérer prix et sa date pour Salar
+            price_info = next(
+                (p for p in data.get("prices", [])
+                 if p.get("serverName") == SERVER_NAME),
+                None
+            )
+            price = price_info.get("price") if price_info else None
+            price_date = price_info.get("lastUpdate") if price_info else None
+
+            characteristics = [
+                Characteristic(
+                    name=c.get("name", {}).get("fr", "") or "",
+                    min_value=c.get("from", 0) or 0,
+                    max_value=c.get("to", 0) or 0
+                )
+                for c in data.get("characteristics", [])
+                if (c.get("name", {}).get("fr", "") or "").lower() != "unknown characteristic"
+            ]
+            item = Item(
+                id=data.get("id"),
+                name_fr=data.get("name", {}).get("fr", "") or "",
+                type_fr=(data.get("type", {}).get("name", {}).get(
+                    "fr", "")) if data.get("type") else "",
+                level=data.get("level", 0) or 0,
+                coefficient=coefficient,
+                price=price,
+                characteristics=characteristics
+            )
+            # Sauvegarde avec les dates
+            self.items_repo.save_item(item)
+            self.items_repo.save_item_details_with_dates(
+                item, coeff_date, price_date)
+            print(f"Détail de l'item {item_id} sauvegardé avec succès.")
+        except Exception as e:
+            print(
+                f"Erreur lors de la récupération du détail de l'item {item_id}: {e}")

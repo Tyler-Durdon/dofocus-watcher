@@ -34,6 +34,17 @@ class ItemsRepository:
 
         self.database.execute(save_details)
 
+    def save_item_details_with_dates(self, item: Item, coeff_date: str, price_date: str) -> None:
+        def save_details(conn):
+            conn.execute("""
+                INSERT OR REPLACE INTO item_details 
+                (id, name_fr, type_fr, level, coefficient, price, coeff_updated_at, price_updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (item.id, item.name_fr, item.type_fr, item.level,
+                  item.coefficient, item.price, coeff_date, price_date))
+
+        self.database.execute(save_details)
+
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
         def get_item(conn):
             item_row = conn.execute("""

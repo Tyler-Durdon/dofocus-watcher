@@ -87,6 +87,8 @@ CREATE TABLE item_details (
     level INTEGER,
     coefficient REAL,
     price REAL,
+    coeff_updated_at TEXT,  
+    price_updated_at TEXT,   
     updated_at TEXT
 );
 
